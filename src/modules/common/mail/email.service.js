@@ -1,4 +1,4 @@
-const nodemailer = require(nodemailer)
+const nodemailer = require("nodemailer")
 class EmailService { 
     transporter;
     constructor(){
@@ -16,7 +16,7 @@ class EmailService {
     sendEmail = async (to, sub, message) => {
             // //Email send
         try{
-            await transporter.sendMail({
+            await this.transporter.sendMail({
                 to: to,
                 from: "no-reply@ecommerce.com",
                 subject: sub,

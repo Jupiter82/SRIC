@@ -1,6 +1,6 @@
-const Joi = require("joi");
+// const Joi = require("joi");
 const { randomString } = require("../../config/helpers.config");
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
 const EmailService = require("../common/mail/email.service");
 
 class AuthController {
@@ -43,9 +43,8 @@ class AuthController {
                                 <small>
                                 <em>Please do not reply to this email.</em>
                                 </small>` 
-
-                    const emailSvc = (new EmailService)
-                    await emailSvc.sendEmail(payload.email,"Activate Your account",message)
+                    await (new EmailService())
+                    .sendEmail(payload.email,"Activate Your account",message)  
                 }
               
             res.json({
@@ -72,6 +71,11 @@ class AuthController {
 
     verifyActivationToken = (req, res, next) =>{
         //TODO: Verify Token
+        res.json({
+            result:req.params,
+            message:"Params",
+            meta:null
+        })
     }
 
     activateUser = (req, res, next) =>{

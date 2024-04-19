@@ -1,5 +1,5 @@
 const Joi = require("joi")
-
+//params is aways in object
 const registerSchema = Joi.object({
     name: Joi.string().min(2).max(30).required(),
     email: Joi.string().email().required(),
@@ -8,4 +8,11 @@ const registerSchema = Joi.object({
     role: Joi.string().pattern(/^(superadmin|admin)$/)
 })
 
-module.exports = {registerSchema}
+const activatioToken = Joi.object({
+    token: Joi.string().length(100).required()
+})
+
+module.exports = {
+    registerSchema,
+    activatioToken
+}
