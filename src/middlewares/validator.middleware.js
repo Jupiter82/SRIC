@@ -2,7 +2,7 @@ const validator = (schema) =>{
     return async (req,res,next) => {
         try {
             let payload = req.body;
-            //
+            // {id:''}
                 if (req.file || req.files) {
                     
                 }

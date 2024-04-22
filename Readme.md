@@ -77,3 +77,12 @@ gmail
 
 
 Node Application ===> Laptop ===> Router Block ===> ISP Server ===>NepalTelecome Server ===> Internet ===> Gmail
+
+
+Registration
+
+Data ===> Validate ===> Mapping ===> Store(Database)
+Database ===> Choose
+
+Relational Database
+Non-Relational DB
