@@ -13,7 +13,6 @@ const activatioToken = Joi.object({
     token: Joi.string().length(100).required()
 })
 
-
 //password and confirm password must match
 //password must be between 8-25 characters
 

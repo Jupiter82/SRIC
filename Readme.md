@@ -85,4 +85,83 @@ Data ===> Validate ===> Mapping ===> Store(Database)
 Database ===> Choose
 
 Relational Database
+    -mysql, mariadb, postgresql,sqlite,oracle,mssql
 Non-Relational DB
+    - mangodb ,couchdb, cassandra, redis
+
+Sql(structure quey language),noSql(not structure quey language)
+
+Non-Relational DB
+orders
+------------------------------------------------------------------------------------------------------------------------
+id      name         product        price          qty          totalAmt           createDate 
+------------------------------------------------------------------------------------------------------------------------
+1        Ram         iPhone 12      128000         1              128000            2023-12-28
+------------------------------------------------------------------------------------------------------------------------
+2        ram         iphone12       120000         1              100000            2023-12-29
+------------------------------------------------------------------------------------------------------------------------
+3        ram         iPhone 12      129000         1              129000            2023-12-30
+
+
+
+Relational DB
+
+users                                           products
+----------------                                -------------------------  
+id      name                                    id      name       price
+--------------                                  ---------------------------
+1       Jupiter                                 1       IPhone 12   128000    
+
+orders
+------------------------------------------------------------------------------------------------------------------------
+id      UserId         productID           qty          totalAmt           createDate 
+------------------------------------------------------------------------------------------------------------------------
+1        1                   1             1              128000            2023-12-28
+------------------------------------------------------------------------------------------------------------------------
+2        1                    1             1               128000              2023-12-29
+------------------------------------------------------------------------------------------------------------------------
+3        1                    1             1              128000              2023-12-30
+
+
+# Mangodb
+- Localize
+- Cloud host(Atlas)
+
+## Mangodb Downloads
+    -> Community Server
+    -> Mangodb Shell
+    -> Mangodb Compass
+
+
+windows => Edit system Environment Variable
+
+host => localhost/127.0.0.1
+protocol => mangodb
+user => null
+password => null
+port => 27017
+dbName => ........
+
+url ===> mangodb://user:password@127.0.0.1:27017/dbname
+
+mongosh
+===> Switch db from shell
+    ----> use <dbname>
+===> List of dbs
+    ----> show dbs;
+===> Current DB(Activate Db)
+    ----> db;
+===> To list all the tables in current DB
+    ----> show tables;
+
+
+
+
+## ORM / ODM
+    ===> Object Relational Mapping/Modeling
+    ===> Object Document Mapping/Modeling
+
+
+Document Based
+core ===> ODM providers ===> Mongoose
+tables ----> collection

@@ -1,7 +1,10 @@
-// const Joi = require("joi");
+require("dotenv").config();
+const { required } = require("joi");
 const { randomString } = require("../../config/helpers.config");
-// const nodemailer = require("nodemailer");
-const EmailService = require("../common/mail/email.service");
+const authSvc = require("./auth.service");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { forgetPassword } = require("./auth.request");
 
 class AuthController {
   //TODO: functions
@@ -11,47 +14,26 @@ class AuthController {
 
       // images
       // none, single, array
-      // if (req.file) {
-      //     payload.image = req.file.filename
-
+      console.log(req.files);
+      if (req.files) {
+        payload.image = req.files[0].filename;
+      }
+      // if (req.files) {
+      //   const images = req.files.map((img) => img.filename);
+      //   payload.image = images;
       // }
 
-      if (req.files) {
-        const images = req.files.map((img) => img.filename);
-        payload.image = images;
-      }
       // Data mapping
       payload.activationToken = randomString(100);
       payload.status = "notactivated";
+
       // DB store: mangodb
       // TODO: DB Operation
-      let dbStatus = true;
-      if (dbStatus) {
-        //
-        // ......... gmail =>
-
-        let link = "http://localhost:5173/activate/" + payload.activationToken;
-        let message = `Dear ${payload.name},<br/>
-                                <p>Your account has been successfully registered. Please click the link below: or copy paste
-                                the url in the browser to activate your account</p>
-                                <a href="${link}">
-                                    ${link}
-                                </a> 
-                                <br/>
-                                Regard, <br/>
-                                System Admin <br/>
-                                <small>
-                                <em>Please do not reply to this email.</em>
-                                </small>`;
-        await new EmailService().sendEmail(
-          payload.email,
-          "Activate Your account",
-          message
-        );
-      }
+      console.log(payload, "payload");
+      const dbStatus = await authSvc.registerUser(payload);
 
       res.json({
-        result: payload,
+        result: dbStatus,
         message: "Register Data",
         meta: null,
       });
@@ -70,53 +52,99 @@ class AuthController {
     // response
   };
 
-  verifyActivationToken = (req, res, next) => {
-    //TODO: Verify Token
-    res.json({
-      result: req.params,
-      message: "Params",
-      meta: null,
-    });
+  verifyActivationToken = async (req, res, next) => {
+    try {
+      let data = await authSvc.getUserByActivationToken(req.params.token);
+      res.json({
+        result: data,
+        message: "User Verified",
+        meta: null,
+      });
+    } catch (exception) {
+      console.log(exception);
+      next(exception);
+    }
   };
 
-  activateUser = (req, res, next) => {
+  activateUser = async (req, res, next) => {
     try {
-      // TODO: Activation of the user
-      // Action
-      let user = {
-        name: "Jupiter Bade",
-        email: "jupiterbade@gmail.com",
-        status: "active",
-        password: "....."
-      };
-      const success = true;
-      //Email Your account has been successfully activated
-      if (success) {
-        res.json({
-          result: req.body,
-          message: "Account Activated successfully",
-          meta: null,
-        });
+      const userDetail = await authSvc.getUserByActivationToken(
+        req.params.token
+      );
+      const data = {
+        password: bcrypt.hashSync(req.body.password, 10),
+        activationToken: null,
+        status: "activated",
+      }; //password
+      console.log(data);
+      const response = await authSvc.updateUserById(userDetail._id, data);
+      res.json({
+        result: response,
+        message: "Your account has been updated successfully.",
+        meta: null,
+      });
+    } catch (exception) {
+      next(exception);
+    }
+  };
+
+  loginUser = async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      const userDetail = await authSvc.getSingleUserByFilter({ email });
+      if (!userDetail) {
+        throw { code: 422, message: "User does not exists", result: { email } };
+      }
+      if (userDetail && userDetail.status === "activated") {
+        //login
+        if (bcrypt.compareSync(password, userDetail.password)) {
+          //password
+          const token = jwt.sign(
+            {
+              userId: userDetail._id,
+            },
+            process.env.JWT_SECRET,
+            {
+              expiresIn: "1 day",
+              subject: `${userDetail._id}`,
+            }
+          );
+          res.json({
+            result: {
+              token: token,
+              type: "Bearer",
+              userDetail: {
+                userId: userDetail._id,
+                name: userDetail.name,
+                role: userDetail.role,
+                image: userDetail.image,
+              },
+            },
+            message: "User Logged in successfully.",
+            meta: null,
+          });
+        } else {
+          //
+          throw { code: 422, message: "Credentails does not match" };
+        }
+        res.json(userDetail);
+        console.log(userDetail);
       } else {
-        throw { code: 422, message: "Cannot activated at this moment" };
+        throw {
+          code: 422,
+          message: "User is not activated or is suspended",
+          result: { email },
+        };
       }
     } catch (exception) {
       next(exception);
     }
   };
 
-  loginUser = (req, res, next) => {
-    // TODO : Login Process
-    res.json({
-      result: "Hello there",
-    });
-  };
-
   getLoggedInUse = (req, res, next) => {
-    console.log("I am me");
-    //TODO: get logged in user
+    const loggedInUser = req.authUser;
     res.json({
-      result: null,
+      result: loggedInUser,
       message: "I am on me route",
       meta: null,
     });
@@ -126,19 +154,74 @@ class AuthController {
     //TODO: Logout logged in user
   };
 
-  sendEmailForForgetPassword = (req, res, next) => {
-    //TODO:
+  sendEmailForForgetPassword = async (req, res, next) => {
+    try {
+      const { email } = req.body;
+      const userDetail = await authSvc.getSingleUserByFilter({
+        email: email,
+      });
+      if (!userDetail) {
+        throw { code: 422, message: "User does not exists", result: { email } };
+      } else {
+        //mail to reset password
+        await authSvc.sendForgetPasswordMail(userDetail);
+        res.json({
+          result: null,
+          message:
+            "An email has been sent to the registered email. PLease check your email for further processing.",
+          meta: null,
+        });
+      }
+    } catch (exception) {
+      next(exception);
+    }
   };
 
-  verifyForgetPasswordToken = (req, res, next) => {
-    //TODO: Set password for forget
+  verifyForgetPasswordToken = async (req, res, next) => {
+    try {
+      let userDetail = await authSvc.getSingleUserByFilter({
+        forgetPasswordToken: req.params.token,
+      });
+      if (userDetail) {
+        res.json({
+          result: userDetail,
+          meta: null,
+          msg: "User does exists and verified",
+        });
+      } else {
+        throw { code: 422, message: "Token does not exists or expired" };
+      }
+    } catch (exception) {
+      throw exception;
+    }
   };
 
-  updatePassword = (req, res, next) => {
-    //TODO: Set password for forget
+  updatePassword = async (req, res, next) => {
+    try {
+      const userDetail = await authSvc.getSingleUserByFilter({
+        forgetPasswordToken: req.params.token,
+      });
+      if (!userDetail) {
+        throw { code: 422, message: "Token does not exists or expired" };
+      } else {
+        const data = {
+          password: bcrypt.hashSync(req.body.password, 10),
+          forgetPasswordToken: null,
+        }; //password
+        console.log(data);
+        const response = await authSvc.updateUserById(userDetail._id, data);
+        res.json({
+          result: response,
+          message: "Your Password has been updated successfully.",
+          meta: null,
+        });
+      }
+    } catch (exception) {
+      next(exception);
+    }
   };
 }
 
 //object = // class
-const authCtrl = new AuthController()
+const authCtrl = new AuthController();
 module.exports = authCtrl;
