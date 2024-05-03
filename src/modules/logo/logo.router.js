@@ -3,50 +3,47 @@ const { USER_ROLES } = require("../../config/constants.config");
 const authCheck = require("../../middlewares/auth.middleware");
 const PermissionCheck = require("../../middlewares/rbac.middleware");
 const { validator } = require("../../middlewares/validator.middleware");
-const bannerCtrl = require("./banner.controller");
-const { bannerCreateSchema } = require("./banner.request");
+const logoCtrl = require("./logo.controller");
+const { logoCreateSchema } = require("./logo.request");
 const uploader = require("../../middlewares/uploader.middleware");
 
 // router.post('/',authCheck, PermissionCheck('admin'), "control")
 
-//banner/view
-router.get("/home", bannerCtrl.listForHome)
+//logo/view
+router.get("/home", logoCtrl.listForHome)
 
-// banner/post/dashboard
+// logo/post/dashboard
 router
   .route("/")
-  //upload-image
   .post(
     authCheck,
     PermissionCheck(USER_ROLES.superadmin),
     uploader.single("image"),
-    validator(bannerCreateSchema),
-    bannerCtrl.createBanner
+    validator(logoCreateSchema),
+    logoCtrl.createLogo
   )
 
   .get(
     authCheck,
     PermissionCheck(USER_ROLES.superadmin),
-    bannerCtrl.listAllBanners
+    logoCtrl.listAllLogos
   )
 router.route("/:id")
   .get(
     authCheck,
     PermissionCheck(USER_ROLES.superadmin),
-    bannerCtrl.getBannerDetail
+    logoCtrl.getLogoDetail
   )
-  //upload
   .put(
     authCheck,
     PermissionCheck(USER_ROLES.superadmin),
     uploader.single("image"),
-    validator(bannerCreateSchema),
-    bannerCtrl.updateById
+    validator(logoCreateSchema),
+    logoCtrl.updateById
   )
-  //delete
   .delete(
     authCheck,
     PermissionCheck(USER_ROLES.superadmin),
-    bannerCtrl.deleteById
+    logoCtrl.deleteById
   )
 module.exports = router;
