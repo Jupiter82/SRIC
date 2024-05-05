@@ -1,10 +1,9 @@
 const http = require('http')
 const app = require("./src/config/express.config")
-const cors = require('cors')
+// const cors = require('cors')
 
 const httpServer = http.createServer(app)
 const port = 3005
-httpServer.use(cors())
 
 httpServer.listen(port, (error) => {
     if(!error){

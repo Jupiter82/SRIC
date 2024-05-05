@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express()
+const cors = require("cors");
+
 require("./db.config")
 const router = require('../routes/router')
 
-
+app.use(cors())
 
 //body parsers
 app.use(express.json())
