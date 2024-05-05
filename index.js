@@ -4,9 +4,7 @@ const cors = require('cors')
 
 const httpServer = http.createServer(app)
 const port = 3005
-app.use(cors(
-    origin='*'
-))
+app.use(cors())
 
 httpServer.listen(port, (error) => {
     if(!error){
