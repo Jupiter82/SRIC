@@ -69,7 +69,14 @@ class BannerService {
         .sort({ _id: "desc" })
         .skip(skip)
         .limit(limit);
-      return data;
+      
+        const modifiedData = data.map(element => {
+          const obj = element.toObject();
+          obj.newUrl = process.env.FRONTEND_URL + "/uploads/" + obj.image;
+          return obj;
+      }); 
+      console.log(modifiedData,"testData")
+      return modifiedData;
     } catch (exception) {
       throw exception;
     }
