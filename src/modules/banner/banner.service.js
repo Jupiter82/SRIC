@@ -68,15 +68,19 @@ class BannerService {
         .populate("updatedBy", ["_id", "name", "role"])
         .sort({ _id: "desc" })
         .skip(skip)
-        .limit(limit);
-      
-        const modifiedData = data.map(element => {
-          const obj = element.toObject();
-          obj.newUrl = "https://sric.onrender.com" + "/uploads/" + obj.image;
-          return obj;
-      }); 
-      console.log(modifiedData,"testData")
-      return modifiedData;
+        .limit(limit)
+        
+        // const modifiedData = data.map((element) => {
+        //   const obj = element.toObject();
+        //   obj.newUrl = "https://sric.onrender.com" + "/uploads/" + obj.image;
+        //   return obj;
+        // }); 
+      // console.log(modifiedData,"testData")
+      // return modifiedData;
+      console.log(data);
+      return data;
+     
+
     } catch (exception) {
       throw exception;
     }
