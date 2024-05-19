@@ -72,7 +72,7 @@ class BannerService {
       
         const modifiedData = data.map(element => {
           const obj = element.toObject();
-          obj.newUrl = process.env.FRONTEND_URL + "/uploads/" + obj.image;
+          obj.newUrl = "https://sric.onrender.com" + "/uploads/" + obj.image;
           return obj;
       }); 
       console.log(modifiedData,"testData")
