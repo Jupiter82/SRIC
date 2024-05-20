@@ -3,7 +3,7 @@ const app = express()
 const cors = require("cors");
 require("./db.config")
 const router = require('../routes/router')
-// const path = require('path');
+const path = require('path');
 
 app.use(cors())
 //body parsers
@@ -11,8 +11,7 @@ app.use(express.json())
 app.use(express.urlencoded({
     extended:false
 }))
-// app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'public', 'uploads')));
-
+app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'public', 'uploads')));
 
 //route
 app.use('/api/v1/', router)

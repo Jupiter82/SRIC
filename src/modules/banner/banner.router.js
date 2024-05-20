@@ -23,7 +23,6 @@ router
     validator(bannerCreateSchema),
     bannerCtrl.createBanner
   )
-
   .get(
     authCheck,
     PermissionCheck(USER_ROLES.superadmin),
