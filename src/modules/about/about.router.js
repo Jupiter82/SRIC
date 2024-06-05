@@ -40,7 +40,7 @@ router
   .put(
     authCheck,
     PermissionCheck(USER_ROLES.superadmin),
-    uploader.single("image"),
+    uploader.array("image"),
     validator(aboutCreateSchema),
     aboutCtrl.updateById
   )
